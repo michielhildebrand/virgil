@@ -148,6 +148,10 @@
 			
 			<div class="step-pane" id="measurements">
 				<h3>Measurements</h3>
+				<table class="table">
+					<thead><tr><th>Reaction</th><th>PRR</th></tr></thead>
+					<tbody></tbody>
+				</table>	
 			</div>
 			
 		</div>
@@ -160,6 +164,7 @@
 			brandsURL = '../aers/api/drug/brands',
 			synonymsURL = '../aers/api/drug/synonyms',
 			reactionsURL = '../aers/api/reactions';
+			prrURL = '../aers/api/measurements/prr';
 		
 		$(function() {
 			function getURLParameter(name) {
@@ -174,6 +179,14 @@
 					drugs.push($(e).val());
 				});
 				return drugs;
+			}
+			
+			function getReactions() {
+				var reactions = [];
+				$('#reactions .labelbox input[type=checkbox]:checked').each(function(i,e) {
+					reactions.push($(e).val());
+				});
+				return reactions;
 			}
 			
 			$.fn.updateDrugNames = function(drugs) {
@@ -202,12 +215,33 @@
 					success: function(o) {
 						$(o.reactions).each(function(i, e) {
 							labelbox.append(
-								'<label class="checkbox"><input type="checkbox">'
+								'<label class="checkbox"><input type="checkbox" value="'+e.reaction+'">'
 								+e.reaction+'<span class="badge">'+e.count+'</span></label>');
 						});
 					}
 				});
 			};
+			
+			$.fn.updateMeasurements = function() {
+				var drugnames = getDrugNames(),
+					reactions = getReactions(),
+					table = $(this).find('tbody');
+				
+				table.html("");
+				
+				$.ajax(prrURL, {
+					dataType:"json",
+					data:{
+						drugnames:drugnames,
+						reactions:reactions
+						},
+					success: function(o) {
+						$(o).each(function(i,e) {
+							table.append('<tr><td>'+e.reaction+'</td><td>'+e.prr+'</td></tr>');
+						})
+					}
+				});
+			}
 			
 			
 			// setup the checkbox toggle buttons
@@ -265,6 +299,9 @@
 				// we only have to update the reactions if we come from the drugs
 				if(o.step==1&&o.direction=="next") {
 					$("#reactions").updateReactions();
+				}
+				else if(o.step==2&&o.direction=="next") {
+					$("#measurements").updateMeasurements();
 				}
 			});
 			

@@ -13,6 +13,7 @@
 :- load_files([ api(drugs),
 		api(reactions),
 		api(reports),
+		api(measurements),
 		applications(virgil)
 	      ],
 	      [ silent(true),

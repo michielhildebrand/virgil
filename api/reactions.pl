@@ -3,8 +3,6 @@
 
 :- use_module(library(http/http_dispatch)).
 :- use_module(library(http/http_parameters)).
-:- use_module(library(semweb/rdf_db)).
-:- use_module(library(semweb/rdf_label)).
 :- use_module(library(util)).
 :- use_module(library(http/http_json)).
 :- use_module(library(aers_report)).
@@ -39,15 +37,6 @@ http_reactions(Request) :-
 			 reactions=Reactions_JSON])).
 
 reaction_obj(C-R, json([reaction=R, count=C])).
-
-reaction(Drugs, Filter, Reaction, Report) :-
-	(   Drugs = [_|_]
-	->  report_by_drug(Drugs, Report)
-	;   true
-	),
-	report_by_filter(Filter, Report),
-	rdf(Report, aers:reaction, Reaction_Lit),
-	literal_text(Reaction_Lit, Reaction).
 
 %%	http_reaction_count(+Request)
 
