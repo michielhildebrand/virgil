@@ -211,6 +211,7 @@
 				
 				$.ajax(reactionsURL, {
 					dataType:"json",
+					type:"POST",
 					data:{drugnames:drugnames},
 					success: function(o) {
 						$(o.reactions).each(function(i, e) {
@@ -231,6 +232,7 @@
 				
 				$.ajax(prrURL, {
 					dataType:"json",
+					type:"POST",
 					data:{
 						drugnames:drugnames,
 						reactions:reactions
