@@ -69,7 +69,7 @@ http_drug_brands(Request) :-
 			[q(Q, []),
 			 source(Source,
 				[oneof([drugbank,orangebook]),
-				 default(orangebook)
+				 default(drugbank)
 				])
 
 			]),
@@ -108,7 +108,7 @@ http_drug_synonyms(Request) :-
 			[q(Q, []),
 			 source(Source,
 				[oneof([drugbank,orangebook]),
-				 default(orangebook)
+				 default(drugbank)
 				])
 			]),
 	findall(BN, drug_synonym(Source, Q, BN), Synonyms0),
