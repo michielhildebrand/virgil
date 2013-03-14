@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="fuelux">
+  <head>
+    <title>Drug selection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="../css/fuelux.min.css" rel="stylesheet" media="screen">
+	
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
+	<script src="http://fuelcdn.com/fuelux-imh/2.2/loader.min.js" type="text/javascript"></script>
+	<script src="../js/bootstrap.min.js"></script>
+
+	<style>
+		body {
+			padding-top: 40px;
+		}
+		.labelbox {
+			margin-top: 10px;
+			padding: 8px;
+			border-top: 1px solid #EEE;
+		}
+		.labelbox .badge {
+			float: right;
+		}
+	</style>
+
+  </head>
+  <body>
+
+	<div id="header" class="container">
+		<div class="navbar navbar-fixed-top navbar-inverse">
+			<div class="navbar-inner">
+				<div class="container">
+			    	<a class="brand" href="#">Virgil</a>
+			    	<ul class="nav">
+		    		</ul>
+				</div>
+			</div>
+		</div>
+	</div>	
+
+	<div id="main" class="container">
+		
+		<h2 id="drug"></h2>
+		
+		<div id="wizard" class="wizard">
+			<ul class="steps">
+				<!--li data-target="#reports" class="active"><span class="badge badge-info">1</span>Reports<span class="chevron"></span></li-->
+				<li data-target="#drugs" class="active"><span class="badge">1</span>Drug names<span class="chevron"></span></li>
+				<li data-target="#reactions"><span class="badge">2</span>Reactions<span class="chevron"></span></li>
+				<li data-target="#measurements"><span class="badge">3</span>Measurements<span class="chevron"></span></li>
+			</ul>
+			<div class="actions">
+				<button class="btn btn-mini btn-prev"> <i class="icon-arrow-left"></i>Prev</button>
+				<button class="btn btn-mini btn-next" data-last="Finish">Next<i class="icon-arrow-right"></i></button>
+			</div>
+		</div>
+		
+		<div class="step-content">
+			<!--div class="step-pane active" id="reports">
+				<h3>Reports</h3>
+			</div-->	
+			
+			<div class="step-pane active" id="drugs">
+				<h3>Drug names</h3>
+
+				<div class="accordion" id="accordion">
+					
+					<div class="accordion-group">
+				    	<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#mentions">
+				        		<h4>Select drug mentions</h4>
+				      		</a>
+				    	</div>
+						<div id="mentions" class="accordion-body collapse in">
+				      		<div class="accordion-inner">
+								<div class="btn-group">
+									<button class="btn" data-toggle="select" data-toggle-name="mention-labels">select all</button>
+									<button class="btn" data-toggle="unselect" data-toggle-name="mention-labels">unselect all</button>
+								</div>
+				        		<div class="labelbox" name="mention-labels"></div>
+				      		</div>
+				    	</div>
+				  	</div>
+
+					<div class="accordion-group">
+				    	<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#brands">
+				        		<h4>Select brand names</h4>
+				      		</a>
+				    	</div>
+						<div id="brands" class="accordion-body collapse">
+				      		<div class="accordion-inner">
+								<div class="btn-group">
+									<button class="btn" data-toggle="select" data-toggle-name="brand-labels">select all</button>
+									<button class="btn" data-toggle="unselect" data-toggle-name="brand-labels">unselect all</button>
+								</div>
+								<ul id="brand-list"></ul>
+				        		<div class="labelbox" name="brand-labels"></div>
+				      		</div>
+				    	</div>
+				  	</div>
+				
+				
+					<div class="accordion-group">
+				    	<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#synonyms">
+				        		<h4>Select synonyms</h4>
+				      		</a>
+				    	</div>
+						<div id="synonyms" class="accordion-body collapse">
+				      		<div class="accordion-inner">
+								<div class="btn-group">
+									<button class="btn" data-toggle="select" data-toggle-name="synonym-labels">select all</button>
+									<button class="btn" data-toggle="unselect" data-toggle-name="synonym-labels">unselect all</button>
+								</div>
+				        		<div class="labelbox" name="synonym-labels"></div>
+				      		</div>
+				    	</div>
+				  	</div>
+				
+					<div class="accordion-group">
+				    	<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#spelling">
+				        		<h4>Select spelling variations</h4>
+				      		</a>
+				    	</div>
+						<div id="spelling" class="accordion-body collapse">
+				      		<div class="accordion-inner">
+								<div class="btn-group">
+									<button class="btn" data-toggle="select" data-toggle-name="spelling-labels">select all</button>
+									<button class="btn" data-toggle="unselect" data-toggle-name="spelling-labels">unselect all</button>
+								</div>
+				        		<div class="labelbox" name="spelling-labels"></div>
+				      		</div>
+				    	</div>
+				  	</div>
+
+				</div>
+				
+			</div>
+			
+			<div class="step-pane" id="reactions">
+				<h3>Reactions</h3>
+				<div class="labelbox"></div>
+			</div>
+			
+			<div class="step-pane" id="measurements">
+				<h3>Measurements</h3>
+			</div>
+			
+		</div>
+
+		
+	</div>	
+	
+	<script>
+		var mentionsURL = '/aers/api/drug/mentions',
+			brandsURL = '/aers/api/drug/brands',
+			synonymsURL = '/aers/api/drug/synonyms',
+			reactionsURL = '/aers/api/reactions';
+		
+		$(function() {
+			function getURLParameter(name) {
+			    return decodeURI(
+			        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+			    );
+			}
+			
+			function getDrugNames() {
+				var drugs = [];
+				$('#drugs .labelbox input[type=checkbox]:checked').each(function(i,e) {
+					drugs.push($(e).val());
+				});
+				return drugs;
+			}
+			
+			$.fn.updateDrugNames = function(drugs) {
+				var labelbox = $(this).find(".labelbox");
+				$.ajax(mentionsURL, {
+					dataType:"json",
+					data:{q:drugs},
+					success: function(o) {
+						$(o).each(function(i, e) {
+							labelbox.append(
+								'<label class="checkbox"><input type="checkbox" value="'+e.name+'">'
+								+e.name+'<span class="badge">'+e.reports+'</span></label>');
+						});
+					}
+				});
+			};
+			
+			$.fn.updateReactions = function() {
+				var labelbox = $(this).find(".labelbox"),
+					drugnames = getDrugNames();
+				labelbox.html("");
+				
+				$.ajax(reactionsURL, {
+					dataType:"json",
+					data:{drugnames:drugnames},
+					success: function(o) {
+						$(o.reactions).each(function(i, e) {
+							labelbox.append(
+								'<label class="checkbox"><input type="checkbox">'
+								+e.reaction+'<span class="badge">'+e.count+'</span></label>');
+						});
+					}
+				});
+			};
+			
+			
+			// setup the checkbox toggle buttons
+			$('button[data-toggle=select]').each(function () {
+				var name = $(this).attr('data-toggle-name');
+				var labelbox = $('.labelbox[name="'+name+'"]');
+				$(this).click(function(e,o) {
+					$(labelbox).find('input[type=checkbox]').prop('checked', true);
+				});
+			});
+			$('button[data-toggle=unselect]').each(function () {
+				var name = $(this).attr('data-toggle-name');
+				var labelbox = $('.labelbox[name="'+name+'"]');
+				$(this).click(function(e,o) {
+					$(labelbox).find('input[type=checkbox]').prop('checked', false);
+				});
+			});
+			
+			var drug = getURLParameter("drug");
+			$("#drug").html(drug);
+			$('#mentions').updateDrugNames([drug]);
+
+			$('#brands').on('show', function() {
+				var brandlist = $('#brand-list');
+				
+				if(!$('#brands').find('.labelbox').html()) {
+					$.ajax(brandsURL, {
+						dataType:"json",
+						data:{q:drug},
+						success: function(o) {
+							$(o).each(function(i,e) {
+								brandlist.append('<li><a href="#">'+e+'</a></li>');
+							});
+							$('#brands').updateDrugNames(o);
+						}
+					});
+					
+				}
+			});
+			
+			$('#synonyms').on('show', function() {
+				if(!$('#synonyms').find('.labelbox').html()) {
+					$.ajax(synonymsURL, {
+						dataType:"json",
+						data:{q:drug},
+						success: function(o) {
+							$('#synonyms').updateDrugNames(o);
+						}
+					});
+					
+				}
+			});
+			
+			$("#wizard").on('change', function(e,o) {
+				// we only have to update the reactions if we come from the drugs
+				if(o.step==1&&o.direction=="next") {
+					$("#reactions").updateReactions();
+				}
+			});
+			
+		});
+		
+	</script>
+  </body>
+</html>
