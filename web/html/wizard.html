@@ -26,6 +26,13 @@
 		.sidebar {
 			margin-top: 10px;
 		}
+		.sidebar .affix {
+			width: 220px;
+			top: 80px;
+		}
+		section {
+			padding-top: 20px;
+		}
 		.footer {
 			border-top: 1px solid #EEE;
 			text-align: center;
@@ -77,7 +84,7 @@
 				<div class="row">
 			
 					<div class="span3 sidebar">
-						<ul id="drug-selection" class="nav nav-tabs nav-stacked">
+						<ul id="drug-selection" class="nav nav-tabs nav-stacked affix-top" data-spy="affix" data-offset-top="80">
 							<li><a href="#mentions">Drug names</a></li>
 							<li><a href="#brands">Brand names</a></li>
 							<li><a href="#synonyms">Synonyms</a></li>
@@ -86,43 +93,43 @@
 					</div>
 
 					<div class="span9">
-
- 						<h5>Drug names</h5>
-						<div id="mentions">
+						
+						<section id="mentions">
+						<h5>Drug names</h5>
 							<div class="btn-group">
 								<button class="btn" data-toggle="select" data-toggle-name="mention-labels">select all</button>
 								<button class="btn" data-toggle="unselect" data-toggle-name="mention-labels">unselect all</button>
 							</div>
 							<div class="labelbox" name="mention-labels"></div>
-						</div>
+						</section>
 
-						<h5>Brand names</h5>
-						<div id="brands">
+						<section id="brands">
+						<h5>Brand names</h5>	
 							<div class="btn-group">
 								<button class="btn" data-toggle="select" data-toggle-name="brand-labels">select all</button>
 								<button class="btn" data-toggle="unselect" data-toggle-name="brand-labels">unselect all</button>
 							</div>
 							<ul id="brand-list"></ul>
 							<div class="labelbox" name="brand-labels"></div>
-						</div>
+						</section>
 				
-			 			<h5>Drug synonyms</h5>
-						<div id="synonyms">
+						<section id="synonyms">
+						<h5>Drug synonyms</h5>
 							 <div class="btn-group">
 								<button class="btn" data-toggle="select" data-toggle-name="synonym-labels">select all</button>
 								<button class="btn" data-toggle="unselect" data-toggle-name="synonym-labels">unselect all</button>
 							</div>
 			        		<div class="labelbox" name="synonym-labels"></div>
-		      			</div>
+		      			</section>
 						
+						<section id="spelling">
 						<h5>Spelling variations</h5>
-						<div id="spelling">
 							<div class="btn-group">
 								<button class="btn" data-toggle="select" data-toggle-name="spelling-labels">select all</button>
 								<button class="btn" data-toggle="unselect" data-toggle-name="spelling-labels">unselect all</button>
 							</div>
 			        		<div class="labelbox" name="spelling-labels"></div>
-			      		</div>
+			      		</section>
 				
 					</div>
 					
