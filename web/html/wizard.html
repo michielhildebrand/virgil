@@ -94,7 +94,7 @@
 
 					<div class="span9">
 						
-						<section id="mentions">
+						<section id="mentions" class="loader">
 						<h5>Drug names</h5>
 							<div class="btn-group">
 								<button class="btn" data-toggle="select" data-toggle-name="mention-labels">select all</button>
@@ -103,7 +103,7 @@
 							<div class="labelbox" name="mention-labels"></div>
 						</section>
 
-						<section id="brands">
+						<section id="brands" class="loader">
 						<h5>Brand names</h5>	
 							<div class="btn-group">
 								<button class="btn" data-toggle="select" data-toggle-name="brand-labels">select all</button>
@@ -113,7 +113,7 @@
 							<div class="labelbox" name="brand-labels"></div>
 						</section>
 				
-						<section id="synonyms">
+						<section id="synonyms" class="loader">
 						<h5>Drug synonyms</h5>
 							 <div class="btn-group">
 								<button class="btn" data-toggle="select" data-toggle-name="synonym-labels">select all</button>
@@ -122,7 +122,7 @@
 			        		<div class="labelbox" name="synonym-labels"></div>
 		      			</section>
 						
-						<section id="spelling">
+						<section id="spelling" class="loader">
 						<h5>Spelling variations</h5>
 							<div class="btn-group">
 								<button class="btn" data-toggle="select" data-toggle-name="spelling-labels">select all</button>
@@ -137,16 +137,20 @@
 			</div>
 			
 			<div class="step-pane" id="reactions">
-				<h4>Select reactions</h4>
-				<div class="labelbox"></div>
+				<section class="loader">
+					<h4>Select reactions</h4>
+					<div class="labelbox"></div>
+				</section>
 			</div>
 			
 			<div class="step-pane" id="measurements">
-				<h4>Select measurements</h4>
-				<table class="table">
-					<thead><tr><th>Reaction</th><th>PRR</th></tr></thead>
-					<tbody></tbody>
-				</table>	
+				<section class="loader">
+					<h4>Select measurements</h4>
+					<table class="table">
+						<thead><tr><th>Reaction</th><th>PRR</th></tr></thead>
+						<tbody></tbody>
+					</table>
+				</section>
 			</div>
 			
 		</div>
@@ -188,11 +192,17 @@
 			}
 			
 			$.fn.updateDrugNames = function(drugs) {
-				var labelbox = $(this).find(".labelbox");
+				var labelbox = $(this).find(".labelbox"),
+					loader = $(this).find(".spinner");
+				loader.show();
 				$.ajax(mentionsURL, {
 					dataType:"json",
 					data:{q:drugs},
+					error: function() {
+						loader.hide();
+					},
 					success: function(o) {
+						loader.hide();
 						$(o).each(function(i, e) {
 							labelbox.append(
 								'<label class="checkbox"><input type="checkbox" value="'+e.name+'" checked>'
@@ -204,14 +214,21 @@
 			
 			$.fn.updateReactions = function() {
 				var labelbox = $(this).find(".labelbox"),
-					drugnames = getDrugNames();
+					drugnames = getDrugNames(),
+					loader = $(this).find(".spinner");
+					
 				labelbox.html("");
+				loader.show();
 				
 				$.ajax(reactionsURL, {
 					dataType:"json",
 					type:"POST",
 					data:{drugnames:drugnames},
+					error: function() {
+						loader.hide();
+					},
 					success: function(o) {
+						loader.hide();
 						$(o.reactions).each(function(i, e) {
 							labelbox.append(
 								'<label class="checkbox"><input type="checkbox" value="'+e.reaction+'">'
@@ -224,9 +241,11 @@
 			$.fn.updateMeasurements = function() {
 				var drugnames = getDrugNames(),
 					reactions = getReactions(),
-					table = $(this).find('tbody');
+					table = $(this).find('tbody'),
+					loader = $(this).find(".spinner");
 				
 				table.html("");
+				loader.show();
 				
 				$.ajax(prrURL, {
 					dataType:"json",
@@ -235,7 +254,11 @@
 						drugnames:drugnames,
 						reactions:reactions
 						},
+					error: function() {
+						loader.hide();
+					},
 					success: function(o) {
+						loader.hide();
 						$(o).each(function(i,e) {
 							table.append('<tr><td>'+e.reaction+'</td><td>'+e.prr+'</td></tr>');
 						})
@@ -260,10 +283,9 @@
 				});
 			});
 			
-			$("#drug-selection a").on("click", function() {
-				//$($(this).attr('href')).collapse('show');
-				
-			});
+			$('.loader').each(function () {
+				$(this).append('<div class="spinner" style="display:none;"><img src="../img/spinner.gif" alt="Loading"/></div>');
+			});	
 			
 			var drug = getURLParameter("drug");
 			$("#drug").html(drug);
