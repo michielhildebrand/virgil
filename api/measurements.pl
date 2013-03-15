@@ -1,5 +1,5 @@
 :- module(measurements,
-	  [flush_virgil_cache/0
+	  [
 	  ]).
 
 :- use_module(library(http/http_dispatch)).
@@ -10,8 +10,7 @@
 
 :- http_handler(cliopatria(aers/api/measurements/prr), http_measurements_prr, []).
 
-:- dynamic
-	virgil_cache/2.
+
 
 http_measurements_prr(Request) :-
 	http_parameters(Request,
@@ -32,10 +31,18 @@ prr_per_reaction([Reaction|Rs], Drugs, [Obj|Os]) :-
 	prr_per_reaction(Rs, Drugs, Os).
 
 prr(Drugs, Reaction, PRR, Prov) :-
-	drug_reactions(Drugs, DRs),
-	length(DRs, D),
-	proof_count(member(Reaction-_, DRs), DE),
+	% total drug cooccurrences
+	drug_reaction_counts(Drugs, DRs),
+	pairs_keys(DRs, DR_Counts),
+	sumlist(DR_Counts, D),
+
+	% drug-reaction cooccurrences
+        memberchk(DE-Reaction, DRs),
+
+	% reaction cooccurrences
 	reaction_count(Reaction, E),
+
+	% total cooccurrences
 	cc_count(A),
 
 	PRR is (DE/D)/((E-DE)/(A-D)),
@@ -48,30 +55,7 @@ prr(Drugs, Reaction, PRR, Prov) :-
 	%Prov = (DE/D)/((E-DE)/(A-D)).
 
 
-drug_reactions(Drugs, DRs) :-
-	virgil_cache(drug(Drugs), DRs),
-	!.
-drug_reactions(Drugs, DRs) :-
-	setof(R-Report, reaction(Drugs, [], R, Report), DRs),
-	assert(virgil_cache(drug(Drugs), DRs)).
-
-reaction_count(Reaction, Count) :-
-	virgil_cache(reaction(Reaction), Count),
-	!.
-reaction_count(Reaction, Count) :-
-	setof(R, report([], [Reaction], [], R), Es),
-	length(Es, Count),
-	assert(virgil_cache(reaction(Reaction), Count)).
-
-cc_count(Count) :-
-	virgil_cache(cc, Count),
-	!.
-cc_count(Count) :-
-	setof(R, report([], [], [], R), As),
-	length(As, Count),
-	assert(virgil_cache(cc, Count)).
 
 
-flush_virgil_cache :-
-	retractall(virgil_cache(_, _)).
+
 

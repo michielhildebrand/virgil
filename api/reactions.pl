@@ -22,11 +22,7 @@ http_reactions(Request) :-
 			 offset(Offset,
 				[default(0)])
 			]),
-	findall(Count-Reaction,
-		(   setof(R, reaction(DrugNames, [], Reaction, R), Rs),
-		    length(Rs, Count)
-		),
-		Reactions0),
+	drug_reaction_counts(DrugNames, Reactions0),
 	keysort(Reactions0, Reactions1),
 	reverse(Reactions1, Reactions),
 	length(Reactions, Total_Reactions),
