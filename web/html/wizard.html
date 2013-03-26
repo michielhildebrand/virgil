@@ -17,11 +17,19 @@
 		}
 		.labelbox {
 			margin-top: 10px;
-			padding: 8px;
 			border-top: 1px solid #EEE;
 		}
 		.labelbox .badge {
 			float: right;
+		}
+		.labelbox label {
+			margin: 4px 8px;
+		}
+		.labelbox label.empty {
+			color: #888;
+		}	
+		.labelbox h6 {
+			margin: 4px 0 0;
 		}
 		.sidebar {
 			margin-top: 10px;
@@ -202,9 +210,13 @@
 			$.fn.appendMentionGroup = function(group) {
 				node = $(this);
 				node.append('<h6>'+group.drug+'</h6>');
-				$(group.mentions).each(function(i, e) {
-					node.appendMention(e);
-				});
+				if(group.mentions.length==0) {
+					node.append('<label class="empty">no mentions</label>')
+				} else {
+					$(group.mentions).each(function(i, e) {
+						node.appendMention(e);
+					});
+				}	
 			};	
 			
 			$.fn.updateDrugNames = function(drug, url) {
