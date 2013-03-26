@@ -52,10 +52,12 @@ drug_mention(Method, Q, Lit, Report) :-
 	),
 	!,
 	rdf_find_literals(Query, Literals),
-	member(Lit, Literals),
+	member(L, Literals),
 	(   Method = corrected
-	->  rdf(DrugUse, aers:drugname_corrected, literal(Lit))
-	;   rdf(DrugUse, aers:drugname, literal(Lit))
+	->  rdf(DrugUse, aers:drugname_corrected, literal(L)),
+	    rdf(DrugUse, aers:drugname, literal(Lit))
+	;   rdf(DrugUse, aers:drugname, literal(L)),
+	    Lit = L
 	),
 	rdf(Report, aers:drug, DrugUse).
 
