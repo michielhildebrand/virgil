@@ -172,7 +172,6 @@ drug_synonym(drugbank, Q, Synonym) :-
 	downcase_atom(Synonym, DS),
 	DQ \== DS.
 
-
 		 /*******************************
 		 *	      JSON terms	*
 		 *******************************/
