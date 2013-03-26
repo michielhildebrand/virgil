@@ -132,7 +132,7 @@
 		      			</section>
 						
 						<section id="spelling" class="loader">
-						<h5>Spelling variations</h5>
+							<h5>Spelling variations</h5>
 							<div class="btn-group">
 								<button class="btn" data-toggle="select" data-toggle-name="spelling-labels">select all</button>
 								<button class="btn" data-toggle="unselect" data-toggle-name="spelling-labels">unselect all</button>
@@ -219,13 +219,14 @@
 				}	
 			};	
 			
-			$.fn.updateDrugNames = function(drug, url) {
+			$.fn.updateDrugNames = function(url, data) {
 				var labelbox = $(this).find(".labelbox"),
 					loader = $(this).find(".spinner");
+
 				loader.show();
 				$.ajax(url, {
 					dataType:"json",
-					data:{q:drug},
+					data:data,
 					error: function() {
 						loader.hide();
 					},
@@ -319,9 +320,10 @@
 			
 			var drug = getURLParameter("drug");
 			$("#drug").html(drug);
-			$('#mentions').updateDrugNames(drug, mentionsURL);
-			$('#brands').updateDrugNames(drug, brandsURL);
-			$('#synonyms').updateDrugNames(drug, synonymsURL);
+			$('#mentions').updateDrugNames(mentionsURL, {q:drug});
+			$('#brands').updateDrugNames(brandsURL, {q:drug});
+			$('#synonyms').updateDrugNames(synonymsURL, {q:drug});
+			$('#spelling').updateDrugNames(mentionsURL, {q:drug,method:"corrected"});
 			
 			$("#wizard").on('change', function(e,o) {
 				// we only have to update the reactions if we come from the drugs
