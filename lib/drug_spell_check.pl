@@ -15,23 +15,24 @@ correct_drug_names :-
 	create_aspell_process([DictOpt,
 			       '--master=drugbank'],
 			      PID),
-	findall(Lit, rdf(_,aers:drugname,Lit), Drugs0),
-	sort(Drugs0, Drugs),
-	setof(T, ( member(D,Drugs),
-		   drug_token(D, T)
-		 ),
-	      DrugTokens),
+	findall(T, drug_name_token(T), DrugTokens0),
+	sort(DrugTokens0, DrugTokens),
+	length(DrugTokens, TokenCount),
+	debug(drugcorrect, 'tokens: ~w', [TokenCount]),
 	spell_check(DrugTokens, PID, Suggestions),
 	length(Suggestions, SuggestCount),
 	debug(drugcorrect, '~w corrected', [SuggestCount]),
 	maplist(assert_suggestion, Suggestions).
 
-drug_token(Lit, A) :-
+drug_name_token(A) :-
+	rdf(_,aers:drugname,Lit),
 	literal_text(Lit, H),
 	tokenize_atom(H, As),
 	member(A, As),
 	atom_length(A, Length),
-	Length > 2.
+	Length > 3,
+	\+ number(A),
+	\+ drug_name(A, _).
 
 spell_check([], _, []).
 spell_check([H|T], PID, [H-Suggestion|Rest]) :-
@@ -48,26 +49,14 @@ assert_suggestion(H-Suggestion) :-
 	rdf_find_literals(H, Literals),
 	forall((member(Lit, Literals),
 	        rdf(R,aers:drugname,literal(Lit))),
-	       rdf_assert(R,aers:drugname_corrected,literal(Suggestion))).
-
-
-
-in_drugbank(Q) :-
-	tokenize_atom(Q,DL),
-	member(Word,DL),
-	find_drug_by_name(Word, _).
-
-find_drug_by_name(Q, Drug) :-
-	rdf_find_literals(case(Q), Literals),
-	member(Lit, Literals),
-	drug_name(Lit, Drug).
+	       rdf_assert(R,aers:drugname_corrected,literal(Suggestion),corrected_drugnames)).
 
 drug_name(L, Drug) :-
-	rdf(Drug,rdfs:label,literal(L)),
+	rdf(Drug,drugbank:'drugbank/genericName',literal(exact(L), _)),
 	rdf(Drug,rdf:type,drugbank:'drugbank/drugs'),
 	!.
 drug_name(L, Drug) :-
-	rdf(Drug,drugbank:'drugbank/synonym',literal(L)),
+	rdf(Drug,drugbank:'drugbank/synonym',literal(exact(L),_)),
 	!.
 drug_name(L, Drug) :-
-	rdf(Drug,drugbank:'drugbank/brandName',literal(L)).
+	rdf(Drug,drugbank:'drugbank/brandName',literal(exact(L),_)).
