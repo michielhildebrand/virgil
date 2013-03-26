@@ -145,7 +145,7 @@ http_drug_synonyms(Request) :-
 	sort(Synonyms0, Synonyms),
 	reply_json(Synonyms).
 
-http_drug_synonym_mentions(Request) :-
+http_drug_brand_mentions(Request) :-
 	http_parameters(Request,
 			[q(Q,
 			   []),
