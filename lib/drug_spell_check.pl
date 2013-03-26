@@ -17,40 +17,37 @@ correct_drug_names :-
 			      PID),
 	findall(Lit, rdf(_,aers:drugname,Lit), Drugs0),
 	sort(Drugs0, Drugs),
-	cleanup_lit(Drugs, Drugs1),
-	length(Drugs, UniqueCount),
-	length(Drugs1, CleanupCount),
-	debug(drugcorrect, '~w unique drug names', [UniqueCount]),
-	debug(drugcorrect, '~w after cleanup', [CleanupCount]),
-	spell_check(Drugs1, PID, Suggestions),
+	setof(T, ( member(D,Drugs),
+		   drug_token(D, T)
+		 ),
+	      DrugTokens),
+	spell_check(DrugTokens, PID, Suggestions),
 	length(Suggestions, SuggestCount),
 	debug(drugcorrect, '~w corrected', [SuggestCount]),
 	maplist(assert_suggestion, Suggestions).
 
-cleanup_lit([], []).
-cleanup_lit([Lit|T], [A-Lit|Rest]) :-
+drug_token(Lit, A) :-
 	literal_text(Lit, H),
-	atom_length(H, Length),
-	Length > 2,
-	tokenize_atom(H, [A0]),
-	downcase_atom(A0, A),
-	!,
-	cleanup_lit(T, Rest).
-cleanup_lit([_|T], Rest) :-
-	cleanup_lit(T, Rest).
+	tokenize_atom(H, As),
+	member(A, As),
+	atom_length(A, Length),
+	Length > 2.
 
 spell_check([], _, []).
-spell_check([A-Lit|T], PID, [Lit-Suggestion|Rest]) :-
-	aspell(PID, A, Suggestions),
-	Suggestions = [Suggestion|_], % we only keep the first suggestion
+spell_check([H|T], PID, [H-Suggestion|Rest]) :-
+	aspell(PID, H, Suggestions),
+	member(Suggestion, Suggestions),
+	drug_name(Suggestion, _),
 	!,
 	%debug(drugcorrect, '~w -> ~w', [A,Suggestion]),
 	spell_check(T, PID, Rest).
 spell_check([_|T], PID, Rest) :-
 	spell_check(T, PID, Rest).
 
-assert_suggestion(Lit-Suggestion) :-
-	forall(rdf(R,aers:drugname,Lit),
+assert_suggestion(H-Suggestion) :-
+	rdf_find_literals(H, Literals),
+	forall((member(Lit, Literals),
+	        rdf(R,aers:drugname,literal(Lit))),
 	       rdf_assert(R,aers:drugname_corrected,literal(Suggestion))).
 
 
