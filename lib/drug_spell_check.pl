@@ -46,7 +46,7 @@ spell_check([_|T], PID, Rest) :-
 	spell_check(T, PID, Rest).
 
 assert_suggestion(H-Suggestion) :-
-	rdf_find_literals(H, Literals),
+	rdf_find_literals(case(H), Literals),
 	forall((member(Lit, Literals),
 	        rdf(R,aers:drugname,literal(Lit))),
 	       rdf_assert(R,aers:drugname_corrected,literal(Suggestion),corrected_drugnames)).
