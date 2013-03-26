@@ -104,17 +104,18 @@
 						</section>
 
 						<section id="brands" class="loader">
-						<h5>Brand names</h5>	
+							<h5>Brand names</h5>	
+							<ul id="brand-list"></ul>
 							<div class="btn-group">
 								<button class="btn" data-toggle="select" data-toggle-name="brand-labels">select all</button>
 								<button class="btn" data-toggle="unselect" data-toggle-name="brand-labels">unselect all</button>
 							</div>
-							<ul id="brand-list"></ul>
 							<div class="labelbox" name="brand-labels"></div>
 						</section>
 				
 						<section id="synonyms" class="loader">
-						<h5>Drug synonyms</h5>
+							<h5>Drug synonyms</h5>
+							<ul id="synonym-list"></ul>
 							 <div class="btn-group">
 								<button class="btn" data-toggle="select" data-toggle-name="synonym-labels">select all</button>
 								<button class="btn" data-toggle="unselect" data-toggle-name="synonym-labels">unselect all</button>
@@ -163,8 +164,8 @@
 	
 	<script>
 		var mentionsURL = '../aers/api/drug/mentions',
-			brandsURL = '../aers/api/drug/brands',
-			synonymsURL = '../aers/api/drug/synonyms',
+			brandsURL = '../aers/api/drug/brand/mentions',
+			synonymsURL = '../aers/api/drug/synonym/mentions',
 			reactionsURL = '../aers/api/reactions';
 			prrURL = '../aers/api/measurements/prr';
 		
@@ -191,22 +192,39 @@
 				return reactions;
 			}
 			
-			$.fn.updateDrugNames = function(drugs) {
+			$.fn.appendMention = function(mention) {
+				$(this).append(
+					'<label class="checkbox"><input type="checkbox" value="'+mention.name+'" checked>'
+					+mention.name+'<span class="badge">'+mention.reports+'</span></label>'
+				);
+			};
+			
+			$.fn.appendMentionGroup = function(group) {
+				node = $(this);
+				node.append('<h6>'+group.drug+'</h6>');
+				$(group.mentions).each(function(i, e) {
+					node.appendMention(e);
+				});
+			};	
+			
+			$.fn.updateDrugNames = function(drug, url) {
 				var labelbox = $(this).find(".labelbox"),
 					loader = $(this).find(".spinner");
 				loader.show();
-				$.ajax(mentionsURL, {
+				$.ajax(url, {
 					dataType:"json",
-					data:{q:drugs},
+					data:{q:drug},
 					error: function() {
 						loader.hide();
 					},
 					success: function(o) {
 						loader.hide();
 						$(o).each(function(i, e) {
-							labelbox.append(
-								'<label class="checkbox"><input type="checkbox" value="'+e.name+'" checked>'
-								+e.name+'<span class="badge">'+e.reports+'</span></label>');
+							if(e.drug) {
+								labelbox.appendMentionGroup(e);
+							} else {
+								labelbox.appendMention(e);
+							}
 						});
 					}
 				});
@@ -289,24 +307,9 @@
 			
 			var drug = getURLParameter("drug");
 			$("#drug").html(drug);
-			$('#mentions').updateDrugNames([drug]);
-			$.ajax(brandsURL, {
-				dataType:"json",
-				data:{q:drug},
-				success: function(o) {
-					$(o).each(function(i,e) {
-						$('brand-list').append('<li><a href="#">'+e+'</a></li>');
-					});
-					$('#brands').updateDrugNames(o);
-				}
-			});
-			$.ajax(synonymsURL, {
-				dataType:"json",
-				data:{q:drug},
-				success: function(o) {
-					$('#synonyms').updateDrugNames(o);
-				}
-			});
+			$('#mentions').updateDrugNames(drug, mentionsURL);
+			$('#brands').updateDrugNames(drug, brandsURL);
+			$('#synonyms').updateDrugNames(drug, synonymsURL);
 			
 			$("#wizard").on('change', function(e,o) {
 				// we only have to update the reactions if we come from the drugs
