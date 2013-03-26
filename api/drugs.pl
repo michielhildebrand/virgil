@@ -7,6 +7,7 @@
 :- use_module(library(http/http_json)).
 :- use_module(library(semweb/rdf_litindex)).
 :- use_module(library(semweb/rdf_label)).
+:- use_module(library(drug_normalise)).
 
 :- http_handler(cliopatria(aers/api/drug/mentions), http_drug_mentions, []).
 :- http_handler(cliopatria(aers/api/drug/brands), http_drug_brands, []).
@@ -37,10 +38,11 @@ drug_mentions(Q, Method, Mentions) :-
 	keysort(Mentions0, Mentions1),
 	reverse(Mentions1, Mentions).
 
-drug_mention(exact, Q, Literal, Report) :-
-	rdf(DrugUse, aers:drugname, literal(exact(Q), Literal)),
-	rdf(Report, aers:drug, DrugUse).
-drug_mention(Method, Q, Lit, Report) :-
+drug_mention(exact, Q, Normalised_Lit, Report) :-
+	rdf(DrugUse, aers:drugname, literal(exact(Q), Lit)),
+	rdf(Report, aers:drug, DrugUse),
+	drug_normalise(Lit, Normalised_Lit).
+drug_mention(Method, Q, Normalised_Lit, Report) :-
 	(   Method = word
 	->  Query = case(Q)
 	;   Method = stem
@@ -59,6 +61,7 @@ drug_mention(Method, Q, Lit, Report) :-
 	;   rdf(DrugUse, aers:drugname, literal(L)),
 	    Lit = L
 	),
+	drug_normalise(Lit, Normalised_Lit),
 	rdf(Report, aers:drug, DrugUse).
 
 drug_list_mentions([], _, []).
