@@ -18,6 +18,7 @@
 		api(reactions),
 		api(reports),
 		api(measurements),
+		library(drug_spell_check),
 		applications(virgil)
 	      ],
 	      [ silent(true),
