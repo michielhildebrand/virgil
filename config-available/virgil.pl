@@ -1,9 +1,13 @@
-:- module(conf_virgil, []).
+:- module(conf_virgil,
+	  [virgil_warmup/0
+	  ]).
 
 /** <module> Adverse Event Mining
 */
 
 :- use_module(library(semweb/rdf_db)).
+:- use_module(library(semweb/rdf_litindex)).
+:- use_module(library(aers_report)).
 
 :- rdf_register_ns(aers, 'http://aers.data2semantics.org/vocab/').
 :- rdf_register_ns(aers_r, 'http://aers.data2semantics.org/report/').
@@ -19,3 +23,9 @@
 	      [ silent(true),
 		if(not_loaded)
 	      ]).
+
+virgil_warmup :-
+	rdf_warm_indexes,
+	rdf_find_literals(a,_),
+	set_prolog_stack(global, limit(4 000 000 000)),
+	cc_count(_).

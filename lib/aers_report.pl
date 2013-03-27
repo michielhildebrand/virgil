@@ -90,7 +90,7 @@ cc_count(Count) :-
 	virgil_cache(cc, Count),
 	!.
 cc_count(Count) :-
-	setof(R-D-E, report_drug_reaction([], R, D, E), As),
+	setof(t(R,D,E), report_drug_reaction([], R, D, E), As),
 	length(As, Count),
 	assert(virgil_cache(cc, Count)).
 
