@@ -7,7 +7,6 @@
 
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdf_litindex)).
-:- use_module(library(aers_report)).
 
 :- rdf_register_ns(aers, 'http://aers.data2semantics.org/vocab/').
 :- rdf_register_ns(aers_r, 'http://aers.data2semantics.org/report/').
@@ -19,6 +18,7 @@
 		api(reports),
 		api(measurements),
 		library(drug_spell_check),
+		library(aers_report),
 		applications(virgil)
 	      ],
 	      [ silent(true),
