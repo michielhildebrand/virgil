@@ -28,3 +28,4 @@ punct('-').
 punct('_').
 punct(')').
 punct('(').
+punct('*').
