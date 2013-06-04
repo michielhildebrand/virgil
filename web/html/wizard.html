@@ -74,6 +74,7 @@
 				<li data-target="#drugs" class="active"><span class="badge">1</span>Drug mentions<span class="chevron"></span></li>
 				<li data-target="#reactions"><span class="badge">2</span>Reactions<span class="chevron"></span></li>
 				<li data-target="#measurements"><span class="badge">3</span>Measurements<span class="chevron"></span></li>
+				<li data-target="#export"><span class="badge">4</span>Export prov<span class="chevron"></span></li>
 			</ul>
 			<div class="actions">
 				<button class="btn btn-mini btn-prev"> <i class="icon-arrow-left"></i>Prev</button>
@@ -153,13 +154,22 @@
 			</div>
 			
 			<div class="step-pane" id="measurements">
-				<section class="loader">
+				<section>
 					<h4>Select measurements</h4>
 					<table class="table">
 						<thead><tr><th>Reaction</th><th>PRR</th></tr></thead>
 						<tbody></tbody>
 					</table>
 				</section>
+			</div>
+			
+			<div class="step-pane" id="export">
+				<section class="loader">
+					<h4>Export Provenance</h4>
+				</section>
+				<div>
+					<img src="http://www.w3.org/Icons/SW/Buttons/sw-prov-magenta.png">
+				</div>	
 			</div>
 			
 		</div>
@@ -176,6 +186,7 @@
 			synonymsURL = '../aers/api/drug/synonym/mentions',
 			reactionsURL = '../aers/api/reactions';
 			prrURL = '../aers/api/measurements/prr';
+			provURL = '../aers/api/measurements/prov';
 		
 		$(function() {
 			function getURLParameter(name) {
@@ -272,30 +283,61 @@
 			$.fn.updateMeasurements = function() {
 				var drugnames = getDrugNames(),
 					reactions = getReactions(),
-					table = $(this).find('tbody'),
-					loader = $(this).find(".spinner");
+					table = $(this).find('tbody');
 				
 				table.html("");
-				loader.show();
+				for (var i=0; i < reactions.length; i++) {
+					var reaction = reactions[i];
+					$('<tr><td class="reaction">'+reaction+'</td>'
+					 +'<td class="prr"><img src="../img/spinner.gif" alt="Loading"/></td>'
+					 +'</tr>')
+					.appendTo(table)
+					.fetchMeasurements(drugnames, reaction);	
+				}
+			};
+				
+			$.fn.fetchMeasurements = function(drugnames, reaction) {
+				var row = $(this);
 				
 				$.ajax(prrURL, {
 					dataType:"json",
 					type:"POST",
 					data:{
 						drugnames:drugnames,
-						reactions:reactions
+						reaction:reaction
 						},
+					error: function() {
+						row.find(".prr").html("");
+					},
+					success: function(o) {
+						row.find(".prr").html(o.prr.value);
+					}
+				});
+			};
+			
+			$.fn.updateExport = function() {
+				var drugnames = getDrugNames(),
+					reactions = getReactions(),
+					loader = $(this).find(".spinner");
+				
+				loader.show();
+				$.ajax(provURL, {
+					dataType:"json",
+					type:"POST",
+					data:{
+						drugnames:drugnames,
+						reactions:reactions
+					},
 					error: function() {
 						loader.hide();
 					},
 					success: function(o) {
+						console.log(o);
 						loader.hide();
-						$(o).each(function(i,e) {
-							table.append('<tr><td>'+e.reaction+'</td><td>'+e.prr+'</td></tr>');
-						})
 					}
 				});
-			}
+				
+			};
 			
 			
 			// setup the checkbox toggle buttons
@@ -333,7 +375,12 @@
 				else if(o.step==2&&o.direction=="next") {
 					$("#measurements").updateMeasurements();
 				}
+				else if(o.step==3&&o.direction=="next") {
+					$("#export").updateExport();
+				}
 			});
+			
+			
 			
 		});
 		

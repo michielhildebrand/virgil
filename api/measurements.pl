@@ -9,6 +9,7 @@
 :- use_module(library(count)).
 
 :- http_handler(cliopatria(aers/api/measurements/prr), http_measurements_prr, []).
+:- http_handler(cliopatria(aers/api/measurements/prov), http_measurements_prov, []).
 
 
 
@@ -16,12 +17,25 @@ http_measurements_prr(Request) :-
 	http_parameters(Request,
 			['drugnames[]'(Drugs,
 				   [list(atom)]),
+			 reaction(Reaction,
+				  [atom
+				  ])
+			]),
+	prr(Drugs, Reaction, PRR, Prov),
+	reply_json(json([reaction=Reaction,
+			 prr=json([value=PRR, prov=Prov])])).
+
+http_measurements_prov(Request) :-
+	http_parameters(Request,
+			['drugnames[]'(Drugs,
+				       [list(atom)]),
 			 'reactions[]'(Reactions,
 				       [list(atom)
 				       ])
 			]),
-	prr_per_reaction(Reactions, Drugs, PRRs),
-	reply_json(PRRs).
+	prr_per_reaction(Reactions, Drugs, JSON),
+	reply_json(JSON).
+
 
 
 prr_per_reaction([], _, []).
